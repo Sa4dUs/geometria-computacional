@@ -6,7 +6,7 @@
 #   - Alejandro García Prada (@AlexGarciaPrada)
 #
 # Created: 2026-02-09
-# Last modified: 2026-02-09
+# Last modified: 2026-02-19
 # License: MIT
 # ============================================================
 
@@ -64,10 +64,92 @@ selectionSort <- function(v) {
   v
 }
 
+mergeSort <- function(v) {
+  n <- length(v)
+  if (n <= 1) return(v)
+  
+  half <- ceiling(n/2)
+  h1 <- mergeSort(v[1:half])
+  h2 <- mergeSort(v[(half + 1):n])
+  
+  return(merge(h1, h2))
+}
+
+merge <- function(a, b) {
+  out <- c()
+  
+  while (length(a) > 0 && length(b) > 0) {
+    if (a[[1]] > b[[1]]) {
+      out <- c(out, b[[1]])
+      b <- b[-1]
+    } else {
+      out <- c(out, a[[1]])
+      a <- a[-1]
+    }
+  }
+  
+  if (length(a) > 0) out <- c(out, a)
+  if (length(b) > 0) out <- c(out, b)
+  
+  out
+}
+
+quickSort <- function(v) {
+  if (length(v) <= 1) return(v)
+  
+  mid <- sample(v, 1)
+  
+  left  <- v[v <  mid]
+  equal <- v[v == mid]
+  right <- v[v >  mid]
+  
+  c(quickSort(left), equal, quickSort(right))
+}
+
+heapSort <- function(v) {
+  n <- length(v)
+  
+  for (i in seq(from = n %/% 2, to = 1, by = -1)) {
+    v <- heapify(v, n, i)
+  }
+  
+  for (i in seq(from = n, to = 2, by = -1)) {
+    temp <- v[1]
+    v[1] <- v[i]
+    v[i] <- temp
+    
+    v <- heapify(v, i - 1, 1)
+  }
+  return(v)
+}
+
+heapify <- function(v, n, i) {
+  largest <- i
+  l <- 2 * i
+  r <- 2 * i + 1
+  
+  if (l <= n && v[l] > v[largest]) {
+    largest <- l
+  }
+  
+  if (r <= n && v[r] > v[largest]) {
+    largest <- r
+  }
+  
+  if (largest != i) {
+    temp <- v[i]
+    v[i] <- v[largest]
+    v[largest] <- temp
+    
+    v <- heapify(v, n, largest)
+  }
+  return(v)
+}
+
 main <- function() {
-  n = 100
+  n = 1000
   v = round(runif(n, 0, n))
-  sort_fns = c(bubbleSort, insertionSort, selectionSort)
+  sort_fns = c(insertionSort, selectionSort, mergeSort, quickSort, heapSort)
   
   for (sort_fn in sort_fns) {
     print(system.time(sort_fn(v)))
