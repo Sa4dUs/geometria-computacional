@@ -55,7 +55,7 @@ ship_clean_union <- polygons_sfc %>%
 ship_outline <- st_union(ship_clean_union) %>% 
   st_buffer(dist = 0)
 
-ship_simplified <- st_simplify(ship_union, dTolerance = 0.005)
+ship_simplified <- st_simplify(ship_clean_union, dTolerance = 0.005)
 
 df_points <- v_df %>% filter(id %in% unique(unlist(lapply(facets_data, `[[`, 2))))
 df_edges <- do.call(rbind, lapply(facets_data, function(x) {
