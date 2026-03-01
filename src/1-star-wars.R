@@ -68,10 +68,10 @@ efficient_tri <- st_intersection(st_collection_extract(st_triangulate(ship_simpl
 
 plot_theme <- theme_void() + theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 
-ggplot(df_points, aes(x, z)) + geom_point(size = 0.1) + coord_fixed() + labs(title = "Points") + plot_theme
-ggplot(df_edges) + geom_segment(aes(x=x1, y=z1, xend=x2, yend=z2), linewidth = 0.1) + coord_fixed() + labs(title = "Edges") + plot_theme
-ggplot() + geom_sf(data = ship_outline, fill = "gray90", color = "blue") + labs(title = "Contour") + plot_theme
-ggplot() + geom_sf(data = efficient_tri, fill = "gray95", color = "black", linewidth = 0.1) + labs(title = "Triangulation") + plot_theme
+ggplot(df_points, aes(x, z)) + geom_point(size = 0.1) + coord_fixed() + labs(title = "2D Projection: Points") + plot_theme
+ggplot(df_edges) + geom_segment(aes(x=x1, y=z1, xend=x2, yend=z2), linewidth = 0.1) + coord_fixed() + labs(title = "2D Projection: Points") + plot_theme
+ggplot() + geom_sf(data = ship_outline, fill = "gray90", color = "blue") + labs(title = "2D Projection: Concave Hull") + plot_theme
+ggplot() + geom_sf(data = efficient_tri, fill = "gray95", color = "black", linewidth = 0.1) + labs(title = "2D Projection: Triangulation") + plot_theme
 
 area <- as.numeric(st_area(ship_simplified))
 
@@ -80,5 +80,5 @@ ggplot() +
   geom_sf(data = ship_simplified, fill = NA, color = "steelblue", linewidth = 0.5) +
   annotate("text", x = Inf, y = -Inf, label = paste("Area:", round(area, 2)), 
            hjust = 1.1, vjust = -1.1, fontface = "bold", color = "darkred") +
-  labs(title = "Final Geometry & Area Verificationx") +
+  labs(title = "Final Geometry & Area Verification") +
   plot_theme
