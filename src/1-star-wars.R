@@ -6,7 +6,7 @@
 #   - Alejandro García Prada (@AlexGarciaPrada)
 #
 # Created: 2026-02-09
-# Last modified: 2026-02-26
+# Last modified: 2026-03-1
 # License: MIT
 # ============================================================
 
@@ -46,7 +46,15 @@ facets_data <- process_visible_facets(f_lines, v_df)
 facets_data <- facets_data[!sapply(facets_data, is.null)]
 
 polygons_sfc <- st_sfc(lapply(facets_data, `[[`, 1))
-ship_union <- st_union(polygons_sfc) %>% st_make_valid()
+
+ship_clean_union <- polygons_sfc %>%
+  st_buffer(dist = 1e-9) %>% 
+  st_union() %>%
+  st_make_valid()
+
+ship_outline <- st_union(ship_clean_union) %>% 
+  st_buffer(dist = 0)
+
 ship_simplified <- st_simplify(ship_union, dTolerance = 0.005)
 
 df_points <- v_df %>% filter(id %in% unique(unlist(lapply(facets_data, `[[`, 2))))
@@ -56,17 +64,14 @@ df_edges <- do.call(rbind, lapply(facets_data, function(x) {
              x2 = v_df$x[c(idx[-1], idx[1])], z2 = v_df$z[c(idx[-1], idx[1])])
 }))
 
-raw_delaunay <- st_triangulate(st_union(st_geometry(df_points %>% st_as_sf(coords = c("x", "z")))))
 efficient_tri <- st_intersection(st_collection_extract(st_triangulate(ship_simplified), "POLYGON"), ship_simplified)
 
 plot_theme <- theme_void() + theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 
 ggplot(df_points, aes(x, z)) + geom_point(size = 0.1) + coord_fixed() + labs(title = "Points") + plot_theme
 ggplot(df_edges) + geom_segment(aes(x=x1, y=z1, xend=x2, yend=z2), linewidth = 0.1) + coord_fixed() + labs(title = "Edges") + plot_theme
-ggplot() + geom_sf(data = raw_delaunay, fill = NA, color = "black", linewidth = 0.1) + labs(title = "Delaunay Triangulation") + plot_theme
-ggplot() + geom_sf(data = ship_union, fill = "gray90", color = "blue") + labs(title = "Contour") + plot_theme
-ggplot() + geom_sf(data = st_intersection(raw_delaunay, ship_union), fill = "gray90") + labs(title = "Intersection") + plot_theme
-ggplot() + geom_sf(data = efficient_tri, fill = "gray95", color = "black", linewidth = 0.1) + labs(title = "Efficient Triangulation") + plot_theme
+ggplot() + geom_sf(data = ship_outline, fill = "gray90", color = "blue") + labs(title = "Contour") + plot_theme
+ggplot() + geom_sf(data = efficient_tri, fill = "gray95", color = "black", linewidth = 0.1) + labs(title = "Triangulation") + plot_theme
 
 area <- as.numeric(st_area(ship_simplified))
 
