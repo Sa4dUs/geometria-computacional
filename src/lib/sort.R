@@ -31,7 +31,7 @@ iterativeBubbleSort <- function (v) {
 }
 
 recursiveBubbleSort <- function(v, n = length(v)) {
-  if (n == 1) return(v)
+  if (n <= 1) return(v)
   
   for (i in 1:(n-1)) {
     if (v[i] > v[i+1]) {
