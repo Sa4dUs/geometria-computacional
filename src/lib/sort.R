@@ -62,7 +62,6 @@ iterativeInsertionSort <- function (v) {
 }
 
 recursiveInsertionSort <- function(v, n = length(v)) {
-  
   if (n <= 1) {
     return(v)
   }
