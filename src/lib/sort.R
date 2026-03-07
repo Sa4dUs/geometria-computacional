@@ -99,7 +99,6 @@ iterativeSelectionSort <- function(v) {
 }
 
 recursiveSelectionSort <- function(v, start = 1) {
-  
   n <- length(v)
   
   if (start >= n) {
