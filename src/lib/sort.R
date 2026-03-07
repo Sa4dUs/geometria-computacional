@@ -11,7 +11,7 @@
 # ============================================================
 
 iterativeBubbleSort <- function (v) {
-  n = length(v)
+  n <- length(v)
   
   for (i in 1:(n-1)) {
     swap = FALSE
@@ -46,7 +46,7 @@ recursiveBubbleSort <- function(v, n = length(v)) {
 
 iterativeInsertionSort <- function (v) {
   
-  n = length(v)
+  n <- length(v)
 
   for (i in 1:n) {
     key = v[i]
@@ -84,7 +84,7 @@ recursiveInsertionSort <- function(v, n = length(v)) {
 }
 
 iterativeSelectionSort <- function(v) {
-  n = length(v)
+  n <- length(v)
   for (i in 1:(n-1)) {
     min_idx <- i
     
@@ -102,7 +102,7 @@ iterativeSelectionSort <- function(v) {
 
 recursiveSelectionSort <- function(v, start = 1) {
   
-  n = length(v)
+  n <- length(v)
   
   if (start >= n) {
     return(v)
@@ -123,7 +123,7 @@ recursiveSelectionSort <- function(v, start = 1) {
   return(v)
 }
 mergeSort <- function(v) {
-  n = length(v)
+  n <- length(v)
   if (n <= 1) return(v)
   
   half <- ceiling(n/2)
