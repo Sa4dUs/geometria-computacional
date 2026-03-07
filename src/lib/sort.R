@@ -45,7 +45,6 @@ recursiveBubbleSort <- function(v, n = length(v)) {
 }
 
 iterativeInsertionSort <- function (v) {
-  
   n <- length(v)
 
   for (i in 1:n) {
