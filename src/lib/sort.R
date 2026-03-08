@@ -10,8 +10,8 @@
 # License: MIT
 # ============================================================
 
-iterativeBubbleSort <- function (v) {
-  n <- length(v)
+bubbleSort <- function (v) {
+  n = length(v)
   
   for (i in 1:(n-1)) {
     swap = FALSE
@@ -30,23 +30,9 @@ iterativeBubbleSort <- function (v) {
   v
 }
 
-recursiveBubbleSort <- function(v, n = length(v)) {
-  if (n <= 1) return(v)
+insertionSort <- function (v) {
+  n = length(v)
   
-  for (i in 1:(n-1)) {
-    if (v[i] > v[i+1]) {
-      tmp <- v[i]
-      v[i] <- v[i+1]
-      v[i+1] <- tmp
-    }
-  }
-  
-  recursiveBubbleSort(v, n-1)
-}
-
-iterativeInsertionSort <- function (v) {
-  n <- length(v)
-
   for (i in 1:n) {
     key = v[i]
     j = i-1
@@ -61,28 +47,8 @@ iterativeInsertionSort <- function (v) {
   v
 }
 
-recursiveInsertionSort <- function(v, n = length(v)) {
-  if (n <= 1) {
-    return(v)
-  }
-  
-  v <- recursiveInsertionSort(v, n - 1)
-  
-  key <- v[n]
-  j <- n - 1
-  
-  while (j > 0 && v[j] > key) {
-    v[j + 1] <- v[j]
-    j <- j - 1
-  }
-  
-  v[j + 1] <- key
-  
-  return(v)
-}
-
-iterativeSelectionSort <- function(v) {
-  n <- length(v)
+selectionSort <- function(v) {
+  n = length(v)
   for (i in 1:(n-1)) {
     min_idx <- i
     
@@ -98,27 +64,6 @@ iterativeSelectionSort <- function(v) {
   v
 }
 
-recursiveSelectionSort <- function(v, start = 1) {
-  n <- length(v)
-  
-  if (start >= n) {
-    return(v)
-  }
-  
-  min_idx <- start
-  
-  for (j in (start + 1):n) {
-    if (v[j] < v[min_idx]) {
-      min_idx <- j
-    }
-  }
-  
-  v[c(start, min_idx)] <- v[c(min_idx, start)]
-  
-  v <- recursiveSelectionSort(v, start + 1)
-  
-  return(v)
-}
 mergeSort <- function(v) {
   n <- length(v)
   if (n <= 1) return(v)
@@ -204,7 +149,7 @@ heapify <- function(v, n, i) {
 main <- function() {
   n = 1000
   v = round(runif(n, 0, n))
-  sort_fns = c(iterativeInsertionSort, iterativeSelectionSort, mergeSort, quickSort, heapSort)
+  sort_fns = c(insertionSort, selectionSort, mergeSort, quickSort, heapSort)
   
   for (sort_fn in sort_fns) {
     print(system.time(sort_fn(v)))
