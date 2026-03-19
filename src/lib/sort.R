@@ -149,7 +149,7 @@ heapify <- function(v, n, i) {
 main <- function() {
   n = 1000
   v = round(runif(n, 0, n))
-  sort_fns = c(insertionSort, selectionSort, mergeSort, quickSort, heapSort)
+  sort_fns = c( mergeSort, quickSort, heapSort)
   
   for (sort_fn in sort_fns) {
     print(system.time(sort_fn(v)))
