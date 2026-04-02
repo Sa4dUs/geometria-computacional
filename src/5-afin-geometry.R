@@ -84,27 +84,22 @@ rotatePointIn3d <- function(point, center, angle, axis = "z") {
   return(as.vector(res))
 }
 
-#For entering the straight line the inputs are the coefficients
-simetricPoint2d <- function(point, coefs) {
-  A <- coefs[1]; B <- coefs[2]; C <- coefs[3]
+#For entering the hiperplane the inputs are the coefficients
+simetricPointRn <- function(point, coefs) {
   
-  n <- c(A, B)
-  n_norm_sq <- sum(n^2)
+  n <- length(point)
   
-  distance <- (sum(n * point) + C) / n_norm_sq
+  if (length(coefs) != n + 1) {
+    stop("Los coeficientes deben tener longitud n + 1")
+  }
   
-  simetric <- point - 2 * distance * n
-  
-  return(as.vector(simetric))
-}
-
-simetricPoint3d <- function(point, coefs) {
-  normal <- coefs[1:3]
-  D <- coefs[4]
+  normal <- coefs[1:n]
+  D <- coefs[n + 1]
   
   n_norm_sq <- sum(normal^2)
   
   factor <- (sum(normal * point) + D) / n_norm_sq
+  
   simetric <- point - 2 * factor * normal
   
   return(as.vector(simetric))
