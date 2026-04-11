@@ -195,7 +195,7 @@ par(mfrow=c(2,2), mar=c(2,2,2,2))
 
 translatePoints2D(points2d, c(3,4))
 rotatePointsIn2d(points2d, c(0,0), 45)
-simetricPoints2D(points2d, c(1,-1,0))
+simetricPoints2D(points2d, c(1,-3,0))
 homothetyPoints2D(points2d, c(0,0), 1.5)
 
 par(mfrow=c(2,2), mar=c(2,2,2,2))
