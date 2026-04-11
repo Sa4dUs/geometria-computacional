@@ -61,7 +61,7 @@ simetricPoints2D <- function(points, coefs) {
   
   drawRegion(points, rgb(0,0,1,0.4))
   drawRegion(result, rgb(1,0.5,0,0.4))
-
+  
   if(coefs[2] != 0){
     abline(a=-d/coefs[2], b=-coefs[1]/coefs[2], lwd=2)
   } else {
@@ -91,7 +91,8 @@ homothetyPoints2D <- function(points, center, k) {
 }
 
 translateSurface3D <- function(x, y, z, vector) {
-  surf3D(x, y, z, col="lightblue", border="black", colkey=FALSE)
+  surf3D(x, y, z, col="lightblue", border="black", colkey=FALSE,
+         main="3D Translation")
   surf3D(x+vector[1], y+vector[2], z+vector[3],
          add=TRUE, col="red", border="black")
 }
@@ -113,7 +114,8 @@ rotateSurface3D <- function(x, y, z, angle, axis="z") {
   y2 <- matrix(rot[,2], nrow=nrow(y))
   z2 <- matrix(rot[,3], nrow=nrow(z))
   
-  surf3D(x, y, z, col="lightblue", border="black", colkey=FALSE)
+  surf3D(x, y, z, col="lightblue", border="black", colkey=FALSE,
+         main=paste("3D Rotation", angle, axis))
   surf3D(x2, y2, z2, add=TRUE, col="green", border="black")
 }
 
@@ -130,7 +132,8 @@ simetricSurface3D <- function(x, y, z, coefs) {
   y2 <- matrix(ref[,2], nrow=nrow(y))
   z2 <- matrix(ref[,3], nrow=nrow(z))
   
-  surf3D(x, y, z, col="lightblue", border="black", colkey=FALSE)
+  surf3D(x, y, z, col="lightblue", border="black", colkey=FALSE,
+         main="3D Symmetry")
   surf3D(x2, y2, z2, add=TRUE, col="orange", border="black")
 }
 
@@ -144,10 +147,10 @@ homothetySurface3D <- function(x, y, z, center, k) {
   y2 <- matrix(res[,2], nrow=nrow(y))
   z2 <- matrix(res[,3], nrow=nrow(z))
   
-  surf3D(x, y, z, col="lightblue", border="black", colkey=FALSE)
+  surf3D(x, y, z, col="lightblue", border="black", colkey=FALSE,
+         main=paste("3D Homothety k=", k))
   surf3D(x2, y2, z2, add=TRUE, col="purple", border="black")
 }
-
 
 grid2d <- expand.grid(x=seq(-2,2,length=100),
                       y=seq(-2,2,length=100))
