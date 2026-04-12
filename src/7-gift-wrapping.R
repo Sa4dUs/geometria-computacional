@@ -41,7 +41,15 @@ points <- matrix(c(
 ), ncol = 2, byrow = TRUE)
 
 hull_idx <- convex_hull_gift_wrapping(points)
+hull_points_list <- lapply(seq_along(hull_idx), function(i) {
+  list(
+    name = paste0("P", i),
+    x = points[hull_idx[i], 1],
+    y = points[hull_idx[i], 2]
+  )
+})
 
+hull_points_list
 plot(points, col = "blue", pch = 19, main = "Convex Hull - Gift Wrapping")
 
 polygon(rbind(points[hull_idx, ], points[hull_idx[1], ]),
