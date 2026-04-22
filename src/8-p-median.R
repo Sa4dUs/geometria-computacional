@@ -2,183 +2,150 @@
 # File: 8-p-median.R
 #
 # Authors:
-#   - Marcelo Domínguez (@sa4dus)
-#   - Alejandro García Prada (@AlexGarciaPrada)
+#    - Marcelo Domínguez (@sa4dus)
+#    - Alejandro García Prada (@AlexGarciaPrada)
 #
 # Created: 2026-04-19
-# Last modified: 2026-04-19
+# Last modified: 2026-04-22
 # License: MIT
 # ============================================================
 
+if (!require("ggplot2")) install.packages("ggplot2")
 library(ggplot2)
 
 read_ <- function(path) {
   lines <- readLines(path, warn = FALSE)
-  lines <- trimws(lines)
-  lines <- lines[lines != ""]
-  
+  lines <- trimws(lines[lines != ""])
   metadata <- as.numeric(unlist(strsplit(lines[1], "\\s+")))
-  
-  n_total <- metadata[1]
-  p_servers <- metadata[2]
-  capacity <- metadata[3]
-  
   node_values <- as.numeric(unlist(strsplit(lines[2:length(lines)], "\\s+")))
   nodes_matrix <- matrix(node_values, ncol = 4, byrow = TRUE)
-  
   nodes_df <- data.frame(
-    id = nodes_matrix[, 1],
-    x = nodes_matrix[, 2],
-    y = nodes_matrix[, 3],
-    demand = nodes_matrix[, 4]
+    id = nodes_matrix[, 1], x = nodes_matrix[, 2], 
+    y = nodes_matrix[, 3], demand = nodes_matrix[, 4]
   )
-  
-  return(list(
-    n = n_total,
-    p = p_servers,
-    c = capacity,
-    nodes = nodes_df
-  ))
+  dist_mtx <- as.matrix(dist(nodes_df[, c("x", "y")]))
+  return(list(n = metadata[1], p = metadata[2], nodes = nodes_df, dist_mtx = dist_mtx))
 }
 
-plot_ <- function(instance) {
-  df <- instance$nodes
-  
-  p <- ggplot(df, aes(x = x, y = y)) +
-    geom_point(aes(size = demand), alpha = 0.7) +
-    theme_minimal() +
-    coord_fixed() +
-    theme(legend.position = "none")
-  
-  return(p)
-}
-
-greedy <- function(candidates, selectfn, feasfn, checkfn, ...) {
-  candidates <- candidates
-  solution   <- list()
-  
-  while (!checkfn(solution, ...) && length(candidates) > 0) {
-    best_candidate <- selectfn(candidates, solution, ...)
-    
-    if (feasfn(best_candidate, solution, ...)) {
-      solution <- append(solution, list(best_candidate))
-    }
-    
-    candidates <- setdiff(candidates, best_candidate)
-    
-    if (is.null(best_candidate)) break
-  }
-  
-  return(solution)
-}
-
-pmedian_calc <- function(selected, instance) {
-  selected <- unlist(selected)
+calc_ofv <- function(selected, dist_mtx) {
   if (length(selected) == 0) return(Inf)
-  
-  nodes <- instance$nodes
-  all_coords <- as.matrix(nodes[, c("x", "y")])
-  hubs_coords <- as.matrix(nodes[nodes$id %in% selected, c("x", "y"), drop = FALSE])
-  
-  if (nrow(hubs_coords) == 0) return(Inf)
-  
-  dist_matrix <- apply(hubs_coords, 1, function(h) {
-    sqrt(colSums((t(all_coords) - h)^2))
+  if (length(selected) == 1) return(sum(dist_mtx[, selected]))
+  return(sum(do.call(pmin.int, as.data.frame(dist_mtx[, selected]))))
+}
+
+pmedian_standard <- function(instance) {
+  sol <- c(); candidates <- 1:instance$n; dist_mtx <- instance$dist_mtx
+  while (length(sol) < instance$p) {
+    costs <- sapply(candidates, function(cand) calc_ofv(c(sol, cand), dist_mtx))
+    best_idx <- which.min(costs)
+    sol <- c(sol, candidates[best_idx])
+    candidates <- candidates[-best_idx]
+  }
+  return(sol)
+}
+
+pmedian_shadow_density <- function(instance) {
+  n <- instance$n; p <- instance$p; dist_mtx <- instance$dist_mtx
+  demands <- instance$nodes$demand
+  R <- mean(dist_mtx) * 0.2
+  sol <- c(); candidates <- 1:n
+  potential <- sapply(1:n, function(i) {
+    neighbors <- which(dist_mtx[i, ] <= R)
+    sum(demands[neighbors])
   })
-  
-  if (is.null(dim(dist_matrix))) {
-    min_dists <- dist_matrix
-  } else {
-    min_dists <- apply(dist_matrix, 1, min)
+  while (length(sol) < p) {
+    best_idx <- candidates[which.max(potential[candidates])]
+    sol <- c(sol, best_idx)
+    candidates <- setdiff(candidates, best_idx)
+    shadow_nodes <- which(dist_mtx[best_idx, ] <= R * 2)
+    potential[shadow_nodes] <- potential[shadow_nodes] * 0.1
   }
-  
-  return(sum(min_dists))
+  return(sol)
 }
 
-pmedian_select <- function(candidates, currsol, instance) {
-  alpha <- 0.05 
+get_avg_time <- function(FUN, inst, reps = 100) {
+  invisible(FUN(inst))
   
-  costs <- sapply(candidates, function(cand) {
-    pmedian_calc(c(unlist(currsol), cand), instance)
-  })
+  gc(verbose = FALSE)
   
-  c_min <- min(costs)
-  c_max <- max(costs)
-  
-  if (c_max == c_min) return(sample(candidates, 1))
-  
-  threshold <- c_min + alpha * (c_max - c_min)
-  rcl <- candidates[costs <= threshold]
-  
-  if (length(rcl) > 1) {
-    return(sample(rcl, 1))
-  } else {
-    return(rcl[1])
+  start_cpu <- proc.time()
+  for (i in 1:reps) {
+    invisible(FUN(inst))
   }
-}
-
-pmedian_feas <- function(candidate, solution, instance) {
-  return(length(solution) < instance$p)
-}
-
-pmedian_check <- function(solution, instance) {
-  return(length(solution) >= instance$p)
-}
-
-pmedian <- function(instance) {
-  n_iterations <- 100 
-  best_total_ofv <- Inf
+  end_cpu <- proc.time()
   
-  for (i in 1:n_iterations) {
-    sol <- greedy(
-      candidates = instance$nodes$id,
-      selectfn = pmedian_select,
-      feasfn = pmedian_feas,
-      checkfn = pmedian_check,
-      instance = instance
-    )
-    
-    current_ofv <- pmedian_calc(unlist(sol), instance)
-    
-    if (current_ofv < best_total_ofv) {
-      best_total_ofv <- current_ofv
-    }
-  }
+  total_cpu <- (end_cpu[1] + end_cpu[2]) - (start_cpu[1] + start_cpu[2])
   
-  return(best_total_ofv)
+  return(total_cpu / reps)
 }
 
-main <- function () {
-  n <- 10
-  dir <-"assets/practica8/" 
+plot_ <- function(results) {
+  results$Speedup <- results$Standard / results$ShadowDensity
+  
+  coeff <- max(results$Speedup) / (max(results$Gap) + 5)
+  
+  p <- ggplot(results, aes(x = Instance)) +
+    geom_bar(aes(y = Speedup, fill = "Speedup (x Times Faster)"), 
+             stat = "identity", alpha = 0.8, width = 0.7) +
+    geom_text(aes(y = Speedup, label = paste0("x", round(Speedup, 1))), 
+              vjust = -0.5, fontface = "bold", size = 3.5) +
+    geom_hline(aes(yintercept = 1), linetype = "dashed", color = "black", alpha = 0.5) +
+    geom_line(aes(y = Gap * coeff, group = 1, color = "Quality Gap (%)"), size = 1.2) +
+    geom_point(aes(y = Gap * coeff, color = "Quality Gap (%)"), size = 3) +
+    geom_label(aes(y = Gap * coeff, label = paste0(round(Gap, 1), "%")), 
+               vjust = 0.5, color = "#e74c3c", fontface = "bold", size = 3,
+               label.size = NA, fill = alpha("white", 0.7)) +
+    scale_y_continuous(
+      name = "Speedup Factor (Bars)",
+      limits = c(0, max(results$Speedup) * 1.1),
+      sec.axis = sec_axis(transform = ~ . / coeff, name = "Quality Gap % (Line)")
+    ) +
+    scale_fill_manual(name = NULL, values = c("Speedup (x Times Faster)" = "#16a085")) +
+    scale_color_manual(name = NULL, values = c("Quality Gap (%)" = "#e74c3c")) +
+    theme_minimal() +
+    labs(x = "") +
+    theme(legend.position = "bottom",
+          plot.title = element_text(face = "bold", size = 16),
+          axis.title.y.right = element_text(color = "#e74c3c", face = "bold"),
+          axis.text.y.right = element_text(color = "#e74c3c"),
+          panel.grid.minor = element_blank())
+  
+  print(p)
+}
+
+main <- function() {
   files <- c("phub_50_5_1.txt", "phub_50_5_2.txt", "phub_50_5_3.txt", "phub_50_5_4.txt", "phub_50_5_5.txt")
-  bkvf <- "best_values_pHub.txt"
+  dir <- "assets/practica8/" 
+  results <- data.frame()
   
-  bkv_df <- read.table(paste0(dir, bkvf), col.names = c("name", "value"))
-  for (file in files) {
-    id = gsub(".txt", "", file)
-    fpath <- paste0(dir, file)
+  cat("Starting benchmark (1000 reps per instance)...\n\n")
+  header <- sprintf("%-15s | %-20s | %-20s | %-6s", "INSTANCE", "STANDARD GREEDY", "SHADOW-DENSITY", "GAP %")
+  cat(header, "\n", paste0(rep("-", nchar(header)), collapse = ""), "\n")
+  
+  for (f in files) {
+    fpath <- paste0(dir, f)
+    if(!file.exists(fpath)) next
+    inst <- read_(fpath)
     
-    instance <- read_(fpath)
-    print(plot_(instance))
+    ofv_s <- calc_ofv(pmedian_standard(inst), inst$dist_mtx)
+    ofv_i <- calc_ofv(pmedian_shadow_density(inst), inst$dist_mtx)
+    gap <- ((ofv_i - ofv_s) / ofv_s) * 100
     
-    res <- numeric(n)
+    t_s <- get_avg_time(pmedian_standard, inst)
+    t_i <- get_avg_time(pmedian_shadow_density, inst)
     
-    for (i in 1:n) {
-      res[i] <- pmedian(instance)
-    }
+    results <- rbind(results, data.frame(
+      Instance = gsub(".txt", "", f),
+      Standard = t_s,
+      ShadowDensity = t_i,
+      Gap = gap
+    ))
     
-    bkv <- bkv_df$value[bkv_df$name == id]
-    
-    best_ofv <- min(res)
-    avg_ofv  <- mean(res)
-    std_dev  <- sd(res)
-    
-    best_gap <- ((best_ofv - bkv) / bkv) * 100
-    avg_gap  <- ((avg_ofv - bkv) / bkv) * 100
-    
-    cat(sprintf("\nINSTANCE ID: %s | BKV: %.2f\nBest OFV: %.2f (Gap: %.2f%%) Avg OFV: %.2f (Gap: %.2f%%)\nSD (Stability): %.4f\n", id, bkv, best_ofv, best_gap,avg_ofv, avg_gap, std_dev))
+    cat(sprintf("%-15s | %8.2f (%8.6fs) | %8.2f (%8.6fs) | %5.2f%%\n", 
+                gsub(".txt", "", f), ofv_s, t_s, ofv_i, t_i, gap))
   }
+  
+  plot_(results)
 }
 
 main()
