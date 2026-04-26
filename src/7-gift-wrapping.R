@@ -10,7 +10,17 @@
 # License: MIT
 # ============================================================
 
+
+orientation <- function(a, b, c) {
+  (b[1] - a[1]) * (c[2] - a[2]) -
+    (b[2] - a[2]) * (c[1] - a[1])
+}
+
 convex_hull_gift_wrapping <- function(points) {
+  
+  points <- as.matrix(points)
+  storage.mode(points) <- "double"
+  
   n <- nrow(points)
   
   if (n < 3) {
@@ -28,7 +38,10 @@ convex_hull_gift_wrapping <- function(points) {
     q <- ifelse(p == 1, 2, 1)
     
     for (i in 1:n) {
-      if (orientation(points[p,], points[i,], points[q,]) == 2) {
+      
+      if (i == p) next
+      
+      if (orientation(points[p,], points[i,], points[q,]) > 0) {
         q <- i
       }
     }
@@ -45,14 +58,16 @@ points <- matrix(c(
   1, 2,
   1.5, 2.5,
   2, 2,
-  2.5,2.5,
+  2.5, 2.5,
   3, 1.5,
   2, 1,
-  1.53,1.66,
-  1.2,1
+  1.53, 1.66,
+  1.2, 1
 ), ncol = 2, byrow = TRUE)
 
+
 hull_idx <- convex_hull_gift_wrapping(points)
+
 hull_points_list <- lapply(seq_along(hull_idx), function(i) {
   list(
     name = paste0("P", i),
@@ -61,7 +76,9 @@ hull_points_list <- lapply(seq_along(hull_idx), function(i) {
   )
 })
 
-hull_points_list
+print(hull_points_list)
+
+
 plot(points, col = "blue", pch = 19, main = "Convex Hull - Gift Wrapping")
 
 polygon(rbind(points[hull_idx, ], points[hull_idx[1], ]),
