@@ -43,10 +43,8 @@ orientation <- function(A, B, C) {
     position = position,
     rotation = rotation
   ))
-<<<<<<< Updated upstream
 }
-=======
-}
+
 
 plot_orientation <- function(A, B, C, titulo="") {
   
@@ -101,4 +99,4 @@ C3 <- c(2, 2)
 
 print(orientation(A3, B3, C3))
 plot_orientation(A3, B3, C3)
->>>>>>> Stashed changes
+
