@@ -43,4 +43,62 @@ orientation <- function(A, B, C) {
     position = position,
     rotation = rotation
   ))
+<<<<<<< Updated upstream
 }
+=======
+}
+
+plot_orientation <- function(A, B, C, titulo="") {
+  
+  res <- orientation(A, B, C)
+  
+  plot(0, 0, type="n",
+       xlim=range(c(A[1], B[1], C[1])) + c(-1,1),
+       ylim=range(c(A[2], B[2], C[2])) + c(-1,1),
+       xlab="X", ylab="Y",
+       main=titulo)
+  
+  points(A[1], A[2], pch=19)
+  points(B[1], B[2], pch=19)
+  points(C[1], C[2], pch=19, col="red")
+  
+  text(A[1], A[2], "A", pos=3)
+  text(B[1], B[2], "B", pos=3)
+  text(C[1], C[2], "C", pos=3, col="red")
+  
+  segments(A[1], A[2], B[1], B[2], lwd=2)
+  
+  segments(A[1], A[2], C[1], C[2], lty=2)
+  segments(B[1], B[2], C[1], C[2], lty=2)
+  
+  legend("topright",
+         legend=c(
+           paste("Det =", res$det),
+           res$position,
+           res$rotation
+         ),
+         bty="n")
+}
+
+A1 <- c(0, 0)
+B1 <- c(4, 0)
+C1 <- c(2, 3)
+
+print(orientation(A1, B1, C1))
+plot_orientation(A1, B1, C1)
+
+
+A2 <- c(0, 0)
+B2 <- c(4, 0)
+C2 <- c(2, -2)
+
+print(orientation(A2, B2, C2))
+plot_orientation(A2, B2, C2)
+
+A3 <- c(0, 0)
+B3 <- c(4, 4)
+C3 <- c(2, 2)
+
+print(orientation(A3, B3, C3))
+plot_orientation(A3, B3, C3)
+>>>>>>> Stashed changes
