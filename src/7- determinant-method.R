@@ -23,24 +23,24 @@ orientation <- function(A, B, C) {
   D <- dx1 * dy2 - dy1 * dx2
   
   if (D > 0) {
-    posicion <- "C está a la izquierda de AB"
+    position <- "C está a la izquierda de AB"
   } else if (D < 0) {
-    posicion <- "C está a la derecha de AB"
+    position <- "C está a la derecha de AB"
   } else {
-    posicion <- "C está alineado con A y B"
+    position <- "C está alineado con A y B"
   }
   
   if (D < 0) {
-    giro <- "Giro a la derecha"
+    rotation <- "Giro a la derecha"
   } else if (D > 0) {
-    giro <- "Giro a la izquierda"
+    rotation <- "Giro a la izquierda"
   } else {
-    giro <- "Sin giro (colineales)"
+    rotation <- "Sin giro (colineales)"
   }
   
   return(list(
     det = D,
-    posicion = posicion,
-    giro = giro
+    position = position,
+    rotation = rotation
   ))
 }
