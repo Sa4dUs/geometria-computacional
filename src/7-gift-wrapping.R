@@ -1,3 +1,15 @@
+# ============================================================
+# File: 7-gift-wrapping.R
+#
+# Authors:
+#   - Marcelo Domínguez (@sa4dus)
+#   - Alejandro García Prada (@AlexGarciaPrada)
+#
+# Created: 2026-04-26
+# Last modified: 2026-04-26
+# License: MIT
+# ============================================================
+
 convex_hull_gift_wrapping <- function(points) {
   n <- nrow(points)
   
