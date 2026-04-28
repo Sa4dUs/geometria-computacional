@@ -111,14 +111,14 @@ def triangulation(poly):
     return triangulation(p1) + triangulation(p2)
 
 
-def draw(poligono, triangulos):
+def draw(polygon, triangles):
     plt.figure()
 
-    x = [p[0] for p in poligono] + [poligono[0][0]]
-    y = [p[1] for p in poligono] + [poligono[0][1]]
+    x = [p[0] for p in polygon] + [polygon[0][0]]
+    y = [p[1] for p in polygon] + [polygon[0][1]]
     plt.plot(x, y, linewidth=2)
 
-    for tri in triangulos:
+    for tri in triangles:
         tx = [p[0] for p in tri] + [tri[0][0]]
         ty = [p[1] for p in tri] + [tri[0][1]]
         plt.plot(tx, ty, linestyle='--')
