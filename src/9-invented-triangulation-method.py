@@ -1,5 +1,5 @@
 # ============================================================
-# File: 9-invented-triangulation-method.R
+# File: 9-invented-triangulation-method.py
 #
 # Authors:
 #   - Marcelo Domínguez (@sa4dus)
@@ -111,20 +111,22 @@ def triangulation(poly):
     return triangulation(p1) + triangulation(p2)
 
 
+import matplotlib.pyplot as plt
+
 def draw(polygon, triangles):
     plt.figure()
-
     x = [p[0] for p in polygon] + [polygon[0][0]]
     y = [p[1] for p in polygon] + [polygon[0][1]]
-    plt.plot(x, y, linewidth=2)
+    plt.plot(x, y, linewidth=2, label="Polygon")
 
     for tri in triangles:
         tx = [p[0] for p in tri] + [tri[0][0]]
         ty = [p[1] for p in tri] + [tri[0][1]]
-        plt.plot(tx, ty, linestyle='--')
+        plt.plot(tx, ty, linestyle='--', label="Triangle")
 
     plt.gca().set_aspect('equal', adjustable='box')
     plt.title("Triangulación inventada")
+    plt.legend()
     plt.show()
 
 
