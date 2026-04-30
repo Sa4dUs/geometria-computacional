@@ -15,7 +15,6 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 
-
 mapa = {
     "A": ["B", "C", "D"],
     "B": ["A", "C", "E", "F"],
@@ -31,41 +30,28 @@ mapa = {
 
 def welsh_powell_coloring(graph):
     degrees = {v: len(neighbors) for v, neighbors in graph.items()}
-
     ordered_nodes = sorted(graph.keys(), key=lambda x: degrees[x], reverse=True)
-
     colors = {}
-
     for node in ordered_nodes:
         used_colors = set()
-
         for neighbor in graph[node]:
             if neighbor in colors:
                 used_colors.add(colors[neighbor])
-
         color = 1
         while color in used_colors:
             color += 1
-
         colors[node] = color
-
     return colors
 
-
-
-import matplotlib.pyplot as plt
-import networkx as nx
-
-def draw_graph_plain(graph):
+def draw_before_after(graph, colors):
     G = nx.Graph()
-
     for node, neighbors in graph.items():
         for n in neighbors:
             G.add_edge(node, n)
 
     pos = nx.spring_layout(G, seed=42)
 
-    plt.figure()
+    fig, ax = plt.subplots(1, 2, figsize=(12, 5))
 
     nx.draw(
         G,
@@ -74,17 +60,28 @@ def draw_graph_plain(graph):
         node_color="lightgray",
         node_size=1000,
         font_size=12,
-        edge_color="gray"
+        edge_color="gray",
+        ax=ax[0]
     )
+    ax[0].set_title("Initial Graph")
 
-    plt.title("Grafo (sin coloración)")
+    color_map = [colors[node] for node in G.nodes()]
+
+    nx.draw(
+        G,
+        pos,
+        with_labels=True,
+        node_color=color_map,
+        cmap=plt.cm.Set3,
+        node_size=1000,
+        font_size=12,
+        edge_color="gray",
+        ax=ax[1]
+    )
+    ax[1].set_title("Graph Colorated")
+
     plt.show()
+
 if __name__ == "__main__":
-
     colors = welsh_powell_coloring(mapa)
-
-    print("Colores asignados:")
-    for node, c in colors.items():
-        print(f"{node} -> Color {c}")
-
-    draw_graph(mapa, colors)
+    draw_before_after(mapa, colors)
