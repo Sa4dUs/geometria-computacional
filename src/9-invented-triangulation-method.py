@@ -118,9 +118,3 @@ if __name__ == "__main__":
 
     draw_before_after(polygon, triangles)
     triangles = triangulation(polygon)
-
-    print("Triángulos:")
-    for t in triangles:
-        print(t)
-
-    draw(polygon, triangles)
